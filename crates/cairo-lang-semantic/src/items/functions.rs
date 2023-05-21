@@ -3,7 +3,8 @@ use std::sync::Arc;
 use cairo_lang_debug::DebugWithDb;
 use cairo_lang_defs::ids::{
     ExternFunctionId, FreeFunctionId, FunctionTitleId, FunctionWithBodyId, ImplFunctionId,
-    ModuleItemId, ParamLongId, TopLevelLanguageElementId, TraitFunctionId, UnstableSalsaId,
+    ModuleItemId, ParamLongId, TopLevelLanguageElementId, TraitFunctionWithoutBodyId,
+    UnstableSalsaId,
 };
 use cairo_lang_diagnostics::{skip_diagnostic, Diagnostics, Maybe};
 use cairo_lang_proc_macros::{DebugWithDb, SemanticObject};
@@ -34,7 +35,7 @@ use crate::{
 pub struct ImplGenericFunctionId {
     // TODO(spapini): Consider making these private and enforcing invariants in the ctor.
     pub impl_id: ImplId,
-    pub function: TraitFunctionId,
+    pub function: TraitFunctionWithoutBodyId,
 }
 impl ImplGenericFunctionId {
     pub fn impl_function(&self, db: &dyn SemanticGroup) -> Maybe<Option<ImplFunctionId>> {

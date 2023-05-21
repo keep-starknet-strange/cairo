@@ -5,8 +5,8 @@ use cairo_lang_defs::diagnostic_utils::StableLocation;
 use cairo_lang_defs::ids::{
     ConstantId, EnumId, ExternFunctionId, ExternTypeId, FreeFunctionId, FunctionTitleId,
     FunctionWithBodyId, GenericParamId, GenericTypeId, ImplAliasId, ImplDefId, ImplFunctionId,
-    LanguageElementId, LookupItemId, ModuleId, ModuleItemId, StructId, TraitFunctionId, TraitId,
-    TypeAliasId, UseId, VariantId,
+    LanguageElementId, LookupItemId, ModuleId, ModuleItemId, StructId, TraitFunctionWithoutBodyId,
+    TraitId, TypeAliasId, UseId, VariantId,
 };
 use cairo_lang_defs::plugin::MacroPlugin;
 use cairo_lang_diagnostics::{Diagnostics, DiagnosticsBuilder, Maybe};
@@ -279,6 +279,7 @@ pub trait SemanticGroup:
     // =======
     /// Private query to compute data about a trait.
     #[salsa::invoke(items::trt::priv_trait_semantic_data)]
+    // TODO(yg): consider renaming to priv_trait_semantic_data, like in impl.
     fn priv_trait_semantic_data(&self, trait_id: TraitId) -> Maybe<items::trt::TraitData>;
     /// Returns the semantic diagnostics of a trait.
     #[salsa::invoke(items::trt::trait_semantic_diagnostics)]
@@ -291,10 +292,13 @@ pub trait SemanticGroup:
     fn trait_attributes(&self, trait_id: TraitId) -> Maybe<Vec<Attribute>>;
     /// Returns the functions of a trait.
     #[salsa::invoke(items::trt::trait_functions)]
-    fn trait_functions(&self, trait_id: TraitId)
-    -> Maybe<OrderedHashMap<SmolStr, TraitFunctionId>>;
+    fn trait_functions(
+        &self,
+        trait_id: TraitId,
+    ) -> Maybe<OrderedHashMap<SmolStr, TraitFunctionWithoutBodyId>>;
     /// Returns the resolution resolved_items of a trait.
     #[salsa::invoke(items::trt::trait_resolver_data)]
+    // TODO(yg): consider renaming to trait_def_resolver_data, like in impl.
     fn trait_resolver_data(&self, trait_id: TraitId) -> Maybe<Arc<ResolverData>>;
     /// Returns the function with the given name of the given trait, if exists.
     #[salsa::invoke(items::trt::trait_function_by_name)]
@@ -302,45 +306,46 @@ pub trait SemanticGroup:
         &self,
         trait_id: TraitId,
         name: SmolStr,
-    ) -> Maybe<Option<TraitFunctionId>>;
+    ) -> Maybe<Option<TraitFunctionWithoutBodyId>>;
 
     // Trait function.
     // ================
+    // TODO(yg): consider adding "declaration" to the name, like in impl.
     /// Private query to compute data about a trait function.
     #[salsa::invoke(items::trt::priv_trait_function_data)]
     fn priv_trait_function_data(
         &self,
-        function_id: TraitFunctionId,
+        function_id: TraitFunctionWithoutBodyId,
     ) -> Maybe<items::trt::TraitFunctionData>;
     /// Returns the semantic diagnostics of a trait function.
     #[salsa::invoke(items::trt::trait_function_diagnostics)]
     fn trait_function_diagnostics(
         &self,
-        trait_function_id: TraitFunctionId,
+        trait_function_id: TraitFunctionWithoutBodyId,
     ) -> Diagnostics<SemanticDiagnostic>;
     /// Returns the signature of a trait function.
     #[salsa::invoke(items::trt::trait_function_signature)]
     fn trait_function_signature(
         &self,
-        trait_function_id: TraitFunctionId,
+        trait_function_id: TraitFunctionWithoutBodyId,
     ) -> Maybe<semantic::Signature>;
     /// Returns the attributes of a trait function.
     #[salsa::invoke(items::trt::trait_function_attributes)]
     fn trait_function_attributes(
         &self,
-        trait_function_id: TraitFunctionId,
+        trait_function_id: TraitFunctionWithoutBodyId,
     ) -> Maybe<Vec<Attribute>>;
     /// Returns the generic params of a trait function.
     #[salsa::invoke(items::trt::trait_function_generic_params)]
     fn trait_function_generic_params(
         &self,
-        trait_function_id: TraitFunctionId,
+        trait_function_id: TraitFunctionWithoutBodyId,
     ) -> Maybe<Vec<GenericParam>>;
     /// Returns the resolution resolved_items of a trait function.
     #[salsa::invoke(items::trt::trait_function_resolver_data)]
     fn trait_function_resolver_data(
         &self,
-        trait_function_id: TraitFunctionId,
+        trait_function_id: TraitFunctionWithoutBodyId,
     ) -> Maybe<Arc<ResolverData>>;
     /// Returns the generic params of a concrete trait function.
     #[salsa::invoke(items::trt::concrete_trait_function_generic_params)]
@@ -354,6 +359,25 @@ pub trait SemanticGroup:
         &self,
         concrete_trait_function_id: ConcreteTraitGenericFunctionId,
     ) -> Maybe<semantic::Signature>;
+
+    /// Returns the semantic diagnostics of a trait function definition (declaration + body).
+    #[salsa::invoke(items::trt::trait_function_body_diagnostics)]
+    fn trait_function_body_diagnostics(
+        &self,
+        trait_function_id: TraitFunctionWithoutBodyId,
+    ) -> Diagnostics<SemanticDiagnostic>;
+    /// Returns the body of a trait function, if any.
+    #[salsa::invoke(items::trt::trait_function_body)]
+    fn trait_function_body(
+        &self,
+        trait_function_id: TraitFunctionWithoutBodyId,
+    ) -> Maybe<Arc<Option<FunctionBody>>>;
+    /// Private query to compute data about a trait function definition (declaration + body)
+    #[salsa::invoke(items::trt::priv_trait_function_body_data)]
+    fn priv_trait_function_body_data(
+        &self,
+        trait_function_id: TraitFunctionWithoutBodyId,
+    ) -> Maybe<Option<items::function_with_body::FunctionBodyData>>;
 
     // Impl.
     // =======
@@ -408,7 +432,7 @@ pub trait SemanticGroup:
     fn impl_function_by_trait_function(
         &self,
         impl_def_id: ImplDefId,
-        trait_function_id: TraitFunctionId,
+        trait_function_id: TraitFunctionWithoutBodyId,
     ) -> Maybe<Option<ImplFunctionId>>;
     /// Returns candidate [ImplDefId]s for a specific trait lookup constraint.
     #[salsa::invoke(items::imp::module_impl_ids_for_trait_info)]
@@ -467,7 +491,7 @@ pub trait SemanticGroup:
     fn impl_function_trait_function(
         &self,
         impl_function_id: ImplFunctionId,
-    ) -> Maybe<TraitFunctionId>;
+    ) -> Maybe<TraitFunctionWithoutBodyId>;
     /// Private query to compute data about an impl function declaration.
     #[salsa::invoke(items::imp::priv_impl_function_declaration_data)]
     fn priv_impl_function_declaration_data(
@@ -806,14 +830,14 @@ pub trait SemanticGroup:
         &self,
         module_id: ModuleId,
         type_filter: lsp_helpers::TypeFilter,
-    ) -> Vec<TraitFunctionId>;
+    ) -> Vec<TraitFunctionWithoutBodyId>;
     /// Returns all methods in a crate that match the given type filter.
     #[salsa::invoke(lsp_helpers::methods_in_crate)]
     fn methods_in_crate(
         &self,
         crate_id: CrateId,
         type_filter: lsp_helpers::TypeFilter,
-    ) -> Vec<TraitFunctionId>;
+    ) -> Vec<TraitFunctionWithoutBodyId>;
 }
 
 impl<T: Upcast<dyn SemanticGroup + 'static>> Elongate for T {

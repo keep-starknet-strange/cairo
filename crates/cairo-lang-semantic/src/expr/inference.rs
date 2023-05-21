@@ -7,7 +7,7 @@ use cairo_lang_debug::DebugWithDb;
 use cairo_lang_defs::ids::{
     ConstantId, EnumId, ExternFunctionId, ExternTypeId, FreeFunctionId, GenericParamId,
     ImplAliasId, ImplDefId, ImplFunctionId, LanguageElementId, LocalVarId, MemberId, ParamId,
-    StructId, TraitFunctionId, TraitId, VarId, VariantId,
+    StructId, TraitFunctionWithoutBodyId, TraitId, VarId, VariantId,
 };
 use cairo_lang_diagnostics::{skip_diagnostic, DiagnosticAdded, Maybe};
 use cairo_lang_proc_macros::DebugWithDb;
@@ -827,7 +827,7 @@ impl<'db> Inference<'db> {
     /// Returns the deduced type and the number of snapshots that need to be added to it.
     pub fn infer_concrete_trait_by_self(
         &mut self,
-        trait_function: TraitFunctionId,
+        trait_function: TraitFunctionWithoutBodyId,
         self_ty: TypeId,
         lookup_context: &ImplLookupContext,
         stable_ptr: SyntaxStablePtrId,

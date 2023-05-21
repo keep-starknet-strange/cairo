@@ -372,6 +372,7 @@ define_language_element_id_as_enum! {
     pub enum FunctionWithBodyId {
         Free(FreeFunctionId),
         Impl(ImplFunctionId),
+        Trait(TraitFunctionWithBodyId),
     }
 }
 impl FunctionWithBodyId {
@@ -379,6 +380,7 @@ impl FunctionWithBodyId {
         match self {
             FunctionWithBodyId::Free(free_function) => free_function.name(db),
             FunctionWithBodyId::Impl(impl_function) => impl_function.name(db),
+            FunctionWithBodyId::Trait(trait_function) => trait_function.name(db),
         }
     }
 }
@@ -391,6 +393,9 @@ impl TopLevelLanguageElementId for FunctionWithBodyId {
             }
             FunctionWithBodyId::Impl(impl_function_id) => {
                 db.lookup_intern_impl_function(*impl_function_id).name(db)
+            }
+            FunctionWithBodyId::Trait(trait_function_id) => {
+                db.lookup_intern_trait_function_without_body(*trait_function_id).name(db)
             }
         }
     }
@@ -428,15 +433,16 @@ define_language_element_id!(
 );
 define_language_element_id!(TraitId, TraitLongId, ast::ItemTrait, lookup_intern_trait, name);
 define_language_element_id_partial!(
-    TraitFunctionId,
-    TraitFunctionLongId,
-    ast::TraitItemFunction,
-    lookup_intern_trait_function,
+    TraitFunctionWithoutBodyId,
+    TraitFunctionWithoutBodyLongId,
+    ast::TraitItemFunctionWithoutBody,
+    lookup_intern_trait_function_without_body,
     name
 );
-impl TraitFunctionId {
+impl TraitFunctionWithoutBodyId {
     pub fn trait_id(&self, db: &dyn DefsGroup) -> TraitId {
-        let TraitFunctionLongId(module_file_id, ptr) = db.lookup_intern_trait_function(*self);
+        let TraitFunctionWithoutBodyLongId(module_file_id, ptr) =
+            db.lookup_intern_trait_function_without_body(*self);
         // Trait function ast lies a few levels bellow the trait ast.
         // Fetch the grand grand grand parent.
         // TODO(spapini): Use a parent function.
@@ -453,15 +459,23 @@ impl TraitFunctionId {
         db.intern_trait(TraitLongId(module_file_id, trait_ptr))
     }
 }
-impl TopLevelLanguageElementId for TraitFunctionId {
+impl TopLevelLanguageElementId for TraitFunctionWithoutBodyId {
     fn full_path(&self, db: &dyn DefsGroup) -> String {
         format!("{}::{}", self.trait_id(db).name(db), self.name(db))
     }
 
     fn name(&self, db: &dyn DefsGroup) -> SmolStr {
-        db.lookup_intern_trait_function(*self).name(db)
+        db.lookup_intern_trait_function_without_body(*self).name(db)
     }
 }
+
+// TODO(yg): remove.
+// define_language_element_id_as_enum! {
+//     pub enum TraitFunctionId {
+//         WithoutBody(TraitFunctionWithoutBodyId),
+//         WithBody(FunctionWithBodyId),
+//     }
+// }
 
 // Struct items.
 // TODO(spapini): Override full_path for to include parents, for better debug.
@@ -546,7 +560,7 @@ define_language_element_id_as_enum! {
     pub enum GenericItemId {
         FreeFunc(FreeFunctionId),
         ExternFunc(ExternFunctionId),
-        TraitFunc(TraitFunctionId),
+        TraitFunc(TraitFunctionWithoutBodyId),
         ImplFunc(ImplFunctionId),
         Trait(TraitId),
         Impl(ImplDefId),
@@ -593,6 +607,13 @@ impl GenericItemId {
                                         ast::FunctionWithBodyPtr(parent0),
                                     )),
                                 ),
+                                // TODO(yg):
+                                // SyntaxKind::TraitBody => GenericItemId::TraitFunc(
+                                //     db.intern_impl_function(TraitFunctionLongId(
+                                //         module_file,
+                                //         ast::FunctionWithBodyPtr(parent0),
+                                //     )),
+                                // ),
                                 _ => panic!(),
                             },
                         }
@@ -603,12 +624,12 @@ impl GenericItemId {
                             ast::ItemExternFunctionPtr(parent0),
                         )))
                     }
-                    SyntaxKind::TraitItemFunction => {
-                        GenericItemId::TraitFunc(db.intern_trait_function(TraitFunctionLongId(
+                    SyntaxKind::TraitItemFunctionWithoutBody => GenericItemId::TraitFunc(
+                        db.intern_trait_function(TraitFunctionWithoutBodyLongId(
                             module_file,
-                            ast::TraitItemFunctionPtr(parent0),
-                        )))
-                    }
+                            ast::TraitItemFunctionWithoutBodyPtr(parent0),
+                        )),
+                    ),
                     _ => panic!(),
                 }
             }
@@ -676,7 +697,7 @@ define_language_element_id_as_enum! {
     pub enum FunctionTitleId {
         Free(FreeFunctionId),
         Extern(ExternFunctionId),
-        Trait(TraitFunctionId),
+        Trait(TraitFunctionWithoutBodyId),
         Impl(ImplFunctionId),
     }
 }

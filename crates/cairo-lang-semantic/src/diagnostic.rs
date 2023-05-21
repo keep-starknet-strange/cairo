@@ -4,7 +4,7 @@ use cairo_lang_debug::DebugWithDb;
 use cairo_lang_defs::diagnostic_utils::StableLocation;
 use cairo_lang_defs::ids::{
     EnumId, FunctionTitleId, ImplDefId, ImplFunctionId, ModuleFileId, StructId,
-    TopLevelLanguageElementId, TraitFunctionId, TraitId,
+    TopLevelLanguageElementId, TraitFunctionWithoutBodyId, TraitId,
 };
 use cairo_lang_defs::plugin::PluginDiagnostic;
 use cairo_lang_diagnostics::{
@@ -685,11 +685,11 @@ pub enum SemanticDiagnosticKind {
     VariantCtorNotImmutable,
     TraitParamMutable {
         trait_id: TraitId,
-        function_id: TraitFunctionId,
+        function_id: TraitFunctionWithoutBodyId,
     },
     TraitFunctionWithBody {
         trait_id: TraitId,
-        function_id: TraitFunctionId,
+        function_id: TraitFunctionWithoutBodyId,
     },
     ParameterShouldBeReference {
         impl_def_id: ImplDefId,
@@ -731,8 +731,8 @@ pub enum SemanticDiagnosticKind {
         generic_args: Vec<GenericArgumentId>,
     },
     AmbiguousTrait {
-        trait_function_id0: TraitFunctionId,
-        trait_function_id1: TraitFunctionId,
+        trait_function_id0: TraitFunctionWithoutBodyId,
+        trait_function_id1: TraitFunctionWithoutBodyId,
     },
     MultipleImplementationOfTrait {
         trait_id: TraitId,

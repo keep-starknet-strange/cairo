@@ -4,8 +4,8 @@ use super::ast::{
     self, FunctionDeclaration, FunctionDeclarationGreen, FunctionWithBody, FunctionWithBodyPtr,
     Item, ItemConstant, ItemEnum, ItemExternFunction, ItemExternFunctionPtr, ItemExternType,
     ItemImpl, ItemImplAlias, ItemModule, ItemStruct, ItemTrait, ItemTypeAlias, ItemUse, Member,
-    Modifier, TerminalIdentifierGreen, TokenIdentifierGreen, TraitItemFunction,
-    TraitItemFunctionPtr,
+    Modifier, TerminalIdentifierGreen, TokenIdentifierGreen, TraitItemFunctionWithoutBody,
+    TraitItemFunctionWithoutBodyPtr,
 };
 use super::db::SyntaxGroup;
 use super::Terminal;
@@ -142,7 +142,7 @@ impl NameGreen for ItemExternFunctionPtr {
     }
 }
 
-impl NameGreen for TraitItemFunctionPtr {
+impl NameGreen for TraitItemFunctionWithoutBodyPtr {
     fn name_green(self, db: &dyn SyntaxGroup) -> TerminalIdentifierGreen {
         self.declaration_green(db).name_green(db)
     }
@@ -231,7 +231,7 @@ impl QueryAttrs for ItemTypeAlias {
         self.attributes(db).elements(db)
     }
 }
-impl QueryAttrs for TraitItemFunction {
+impl QueryAttrs for TraitItemFunctionWithoutBody {
     fn attributes_elements(&self, db: &dyn SyntaxGroup) -> Vec<Attribute> {
         self.attributes(db).elements(db)
     }

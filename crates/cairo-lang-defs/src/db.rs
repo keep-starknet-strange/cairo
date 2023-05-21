@@ -51,7 +51,10 @@ pub trait DefsGroup:
     #[salsa::interned]
     fn intern_trait(&self, id: TraitLongId) -> TraitId;
     #[salsa::interned]
-    fn intern_trait_function(&self, id: TraitFunctionLongId) -> TraitFunctionId;
+    fn intern_trait_function_without_body(
+        &self,
+        id: TraitFunctionWithoutBodyLongId,
+    ) -> TraitFunctionWithoutBodyId;
     #[salsa::interned]
     fn intern_impl(&self, id: ImplDefLongId) -> ImplDefId;
     #[salsa::interned]

@@ -1,5 +1,5 @@
 use cairo_lang_defs::ids::{
-    LanguageElementId, ModuleId, TopLevelLanguageElementId, TraitFunctionId,
+    LanguageElementId, ModuleId, TopLevelLanguageElementId, TraitFunctionWithoutBodyId,
 };
 use cairo_lang_filesystem::ids::FileId;
 use cairo_lang_semantic::db::SemanticGroup;
@@ -78,7 +78,7 @@ pub fn dot_completions(
 fn completion_for_method(
     db: &dyn SemanticGroup,
     module_id: ModuleId,
-    trait_function: TraitFunctionId,
+    trait_function: TraitFunctionWithoutBodyId,
 ) -> Option<CompletionItem> {
     let trait_id = trait_function.trait_id(db.upcast());
     let name = trait_function.name(db.upcast());
@@ -134,7 +134,7 @@ fn find_methods_for_type(
     mut resolver: Resolver<'_>,
     ty: cairo_lang_semantic::TypeId,
     stable_ptr: cairo_lang_syntax::node::ids::SyntaxStablePtrId,
-) -> Vec<TraitFunctionId> {
+) -> Vec<TraitFunctionWithoutBodyId> {
     let type_filter = match ty.head(db) {
         Some(head) => TypeFilter::TypeHead(head),
         None => TypeFilter::NoFilter,

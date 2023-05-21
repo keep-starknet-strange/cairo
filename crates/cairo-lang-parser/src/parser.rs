@@ -584,15 +584,17 @@ impl<'a> Parser<'a> {
     }
 
     /// Assumes the current token is Function.
-    /// Expected pattern: `<FunctionDeclaration><SemiColon>`
-    fn expect_trait_function(&mut self, attributes: AttributeListGreen) -> TraitItemFunctionGreen {
+    /// Expected pattern: `<FunctionDeclaration>[<SemiColon> | <Block>]`
+    fn expect_trait_function(&mut self, attributes: AttributeListGreen) -> TraitItemGreen {
         let declaration = self.expect_function_declaration();
-        let body = if self.peek().kind == SyntaxKind::TerminalLBrace {
-            self.parse_block().into()
+        if self.peek().kind == SyntaxKind::TerminalLBrace {
+            let body = self.parse_block().into();
+            FunctionWithBody::new_green(self.db, attributes, declaration, body).into()
         } else {
-            self.parse_token::<TerminalSemicolon>().into()
-        };
-        TraitItemFunction::new_green(self.db, attributes, declaration, body)
+            let semicolon = self.parse_token::<TerminalSemicolon>().into();
+            TraitItemFunctionWithoutBody::new_green(self.db, attributes, declaration, semicolon)
+                .into()
+        }
     }
 
     /// Assumes the current token is Impl.

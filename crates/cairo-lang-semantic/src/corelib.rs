@@ -1,5 +1,5 @@
 use cairo_lang_defs::ids::{
-    EnumId, GenericTypeId, ImplDefId, ModuleId, ModuleItemId, TraitFunctionId, TraitId,
+    EnumId, GenericTypeId, ImplDefId, ModuleId, ModuleItemId, TraitFunctionWithoutBodyId, TraitId,
 };
 use cairo_lang_diagnostics::{Maybe, ToOption};
 use cairo_lang_filesystem::ids::{CrateId, CrateLongId};
@@ -583,7 +583,7 @@ fn get_core_trait_function(
     db: &dyn SemanticGroup,
     trait_name: SmolStr,
     function_name: SmolStr,
-) -> Maybe<Option<TraitFunctionId>> {
+) -> Maybe<Option<TraitFunctionWithoutBodyId>> {
     db.trait_function_by_name(get_core_trait(db, trait_name), function_name)
 }
 

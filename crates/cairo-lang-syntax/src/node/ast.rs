@@ -9044,7 +9044,8 @@ impl TypedSyntaxNode for TraitItemList {
 }
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum TraitItem {
-    Function(TraitItemFunction),
+    FunctionWithoutBody(TraitItemFunctionWithoutBody),
+    FunctionWithBody(FunctionWithBody),
     Missing(TraitItemMissing),
 }
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
@@ -9054,8 +9055,13 @@ impl TraitItemPtr {
         self.0
     }
 }
-impl From<TraitItemFunctionPtr> for TraitItemPtr {
-    fn from(value: TraitItemFunctionPtr) -> Self {
+impl From<TraitItemFunctionWithoutBodyPtr> for TraitItemPtr {
+    fn from(value: TraitItemFunctionWithoutBodyPtr) -> Self {
+        Self(value.0)
+    }
+}
+impl From<FunctionWithBodyPtr> for TraitItemPtr {
+    fn from(value: FunctionWithBodyPtr) -> Self {
         Self(value.0)
     }
 }
@@ -9064,8 +9070,13 @@ impl From<TraitItemMissingPtr> for TraitItemPtr {
         Self(value.0)
     }
 }
-impl From<TraitItemFunctionGreen> for TraitItemGreen {
-    fn from(value: TraitItemFunctionGreen) -> Self {
+impl From<TraitItemFunctionWithoutBodyGreen> for TraitItemGreen {
+    fn from(value: TraitItemFunctionWithoutBodyGreen) -> Self {
+        Self(value.0)
+    }
+}
+impl From<FunctionWithBodyGreen> for TraitItemGreen {
+    fn from(value: FunctionWithBodyGreen) -> Self {
         Self(value.0)
     }
 }
@@ -9086,8 +9097,11 @@ impl TypedSyntaxNode for TraitItem {
     fn from_syntax_node(db: &dyn SyntaxGroup, node: SyntaxNode) -> Self {
         let kind = node.kind(db);
         match kind {
-            SyntaxKind::TraitItemFunction => {
-                TraitItem::Function(TraitItemFunction::from_syntax_node(db, node))
+            SyntaxKind::TraitItemFunctionWithoutBody => TraitItem::FunctionWithoutBody(
+                TraitItemFunctionWithoutBody::from_syntax_node(db, node),
+            ),
+            SyntaxKind::FunctionWithBody => {
+                TraitItem::FunctionWithBody(FunctionWithBody::from_syntax_node(db, node))
             }
             SyntaxKind::TraitItemMissing => {
                 TraitItem::Missing(TraitItemMissing::from_syntax_node(db, node))
@@ -9097,7 +9111,8 @@ impl TypedSyntaxNode for TraitItem {
     }
     fn as_syntax_node(&self) -> SyntaxNode {
         match self {
-            TraitItem::Function(x) => x.as_syntax_node(),
+            TraitItem::FunctionWithoutBody(x) => x.as_syntax_node(),
+            TraitItem::FunctionWithBody(x) => x.as_syntax_node(),
             TraitItem::Missing(x) => x.as_syntax_node(),
         }
     }
@@ -9112,7 +9127,8 @@ impl TraitItem {
     #[allow(clippy::match_like_matches_macro)]
     pub fn is_variant(kind: SyntaxKind) -> bool {
         match kind {
-            SyntaxKind::TraitItemFunction => true,
+            SyntaxKind::TraitItemFunctionWithoutBody => true,
+            SyntaxKind::FunctionWithBody => true,
             SyntaxKind::TraitItemMissing => true,
             _ => false,
         }
@@ -9176,42 +9192,42 @@ impl TypedSyntaxNode for TraitItemMissing {
     }
 }
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub struct TraitItemFunction {
+pub struct TraitItemFunctionWithoutBody {
     node: SyntaxNode,
     children: Vec<SyntaxNode>,
 }
-impl TraitItemFunction {
+impl TraitItemFunctionWithoutBody {
     pub const INDEX_ATTRIBUTES: usize = 0;
     pub const INDEX_DECLARATION: usize = 1;
-    pub const INDEX_BODY: usize = 2;
+    pub const INDEX_SEMICOLON: usize = 2;
     pub fn new_green(
         db: &dyn SyntaxGroup,
         attributes: AttributeListGreen,
         declaration: FunctionDeclarationGreen,
-        body: MaybeTraitFunctionBodyGreen,
-    ) -> TraitItemFunctionGreen {
-        let children: Vec<GreenId> = vec![attributes.0, declaration.0, body.0];
+        semicolon: TerminalSemicolonGreen,
+    ) -> TraitItemFunctionWithoutBodyGreen {
+        let children: Vec<GreenId> = vec![attributes.0, declaration.0, semicolon.0];
         let width = children.iter().copied().map(|id| db.lookup_intern_green(id).width()).sum();
-        TraitItemFunctionGreen(db.intern_green(GreenNode {
-            kind: SyntaxKind::TraitItemFunction,
+        TraitItemFunctionWithoutBodyGreen(db.intern_green(GreenNode {
+            kind: SyntaxKind::TraitItemFunctionWithoutBody,
             details: GreenNodeDetails::Node { children, width },
         }))
     }
 }
-impl TraitItemFunction {
+impl TraitItemFunctionWithoutBody {
     pub fn attributes(&self, db: &dyn SyntaxGroup) -> AttributeList {
         AttributeList::from_syntax_node(db, self.children[0].clone())
     }
     pub fn declaration(&self, db: &dyn SyntaxGroup) -> FunctionDeclaration {
         FunctionDeclaration::from_syntax_node(db, self.children[1].clone())
     }
-    pub fn body(&self, db: &dyn SyntaxGroup) -> MaybeTraitFunctionBody {
-        MaybeTraitFunctionBody::from_syntax_node(db, self.children[2].clone())
+    pub fn semicolon(&self, db: &dyn SyntaxGroup) -> TerminalSemicolon {
+        TerminalSemicolon::from_syntax_node(db, self.children[2].clone())
     }
 }
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
-pub struct TraitItemFunctionPtr(pub SyntaxStablePtrId);
-impl TraitItemFunctionPtr {
+pub struct TraitItemFunctionWithoutBodyPtr(pub SyntaxStablePtrId);
+impl TraitItemFunctionWithoutBodyPtr {
     pub fn declaration_green(self, db: &dyn SyntaxGroup) -> FunctionDeclarationGreen {
         let ptr = db.lookup_intern_stable_ptr(self.0);
         if let SyntaxStablePtr::Child { key_fields, .. } = ptr {
@@ -9225,19 +9241,19 @@ impl TraitItemFunctionPtr {
     }
 }
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
-pub struct TraitItemFunctionGreen(pub GreenId);
-impl TypedSyntaxNode for TraitItemFunction {
-    const OPTIONAL_KIND: Option<SyntaxKind> = Some(SyntaxKind::TraitItemFunction);
-    type StablePtr = TraitItemFunctionPtr;
-    type Green = TraitItemFunctionGreen;
+pub struct TraitItemFunctionWithoutBodyGreen(pub GreenId);
+impl TypedSyntaxNode for TraitItemFunctionWithoutBody {
+    const OPTIONAL_KIND: Option<SyntaxKind> = Some(SyntaxKind::TraitItemFunctionWithoutBody);
+    type StablePtr = TraitItemFunctionWithoutBodyPtr;
+    type Green = TraitItemFunctionWithoutBodyGreen;
     fn missing(db: &dyn SyntaxGroup) -> Self::Green {
-        TraitItemFunctionGreen(db.intern_green(GreenNode {
-            kind: SyntaxKind::TraitItemFunction,
+        TraitItemFunctionWithoutBodyGreen(db.intern_green(GreenNode {
+            kind: SyntaxKind::TraitItemFunctionWithoutBody,
             details: GreenNodeDetails::Node {
                 children: vec![
                     AttributeList::missing(db).0,
                     FunctionDeclaration::missing(db).0,
-                    MaybeTraitFunctionBody::missing(db).0,
+                    TerminalSemicolon::missing(db).0,
                 ],
                 width: TextWidth::default(),
             },
@@ -9247,10 +9263,10 @@ impl TypedSyntaxNode for TraitItemFunction {
         let kind = node.kind(db);
         assert_eq!(
             kind,
-            SyntaxKind::TraitItemFunction,
+            SyntaxKind::TraitItemFunctionWithoutBody,
             "Unexpected SyntaxKind {:?}. Expected {:?}.",
             kind,
-            SyntaxKind::TraitItemFunction
+            SyntaxKind::TraitItemFunctionWithoutBody
         );
         let children = node.children(db).collect();
         Self { node, children }
@@ -9262,86 +9278,7 @@ impl TypedSyntaxNode for TraitItemFunction {
         self.node.clone()
     }
     fn stable_ptr(&self) -> Self::StablePtr {
-        TraitItemFunctionPtr(self.node.0.stable_ptr)
-    }
-}
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub enum MaybeTraitFunctionBody {
-    Some(ExprBlock),
-    None(TerminalSemicolon),
-}
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
-pub struct MaybeTraitFunctionBodyPtr(pub SyntaxStablePtrId);
-impl MaybeTraitFunctionBodyPtr {
-    pub fn untyped(&self) -> SyntaxStablePtrId {
-        self.0
-    }
-}
-impl From<ExprBlockPtr> for MaybeTraitFunctionBodyPtr {
-    fn from(value: ExprBlockPtr) -> Self {
-        Self(value.0)
-    }
-}
-impl From<TerminalSemicolonPtr> for MaybeTraitFunctionBodyPtr {
-    fn from(value: TerminalSemicolonPtr) -> Self {
-        Self(value.0)
-    }
-}
-impl From<ExprBlockGreen> for MaybeTraitFunctionBodyGreen {
-    fn from(value: ExprBlockGreen) -> Self {
-        Self(value.0)
-    }
-}
-impl From<TerminalSemicolonGreen> for MaybeTraitFunctionBodyGreen {
-    fn from(value: TerminalSemicolonGreen) -> Self {
-        Self(value.0)
-    }
-}
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
-pub struct MaybeTraitFunctionBodyGreen(pub GreenId);
-impl TypedSyntaxNode for MaybeTraitFunctionBody {
-    const OPTIONAL_KIND: Option<SyntaxKind> = None;
-    type StablePtr = MaybeTraitFunctionBodyPtr;
-    type Green = MaybeTraitFunctionBodyGreen;
-    fn missing(db: &dyn SyntaxGroup) -> Self::Green {
-        panic!("No missing variant.");
-    }
-    fn from_syntax_node(db: &dyn SyntaxGroup, node: SyntaxNode) -> Self {
-        let kind = node.kind(db);
-        match kind {
-            SyntaxKind::ExprBlock => {
-                MaybeTraitFunctionBody::Some(ExprBlock::from_syntax_node(db, node))
-            }
-            SyntaxKind::TerminalSemicolon => {
-                MaybeTraitFunctionBody::None(TerminalSemicolon::from_syntax_node(db, node))
-            }
-            _ => panic!(
-                "Unexpected syntax kind {:?} when constructing {}.",
-                kind, "MaybeTraitFunctionBody"
-            ),
-        }
-    }
-    fn as_syntax_node(&self) -> SyntaxNode {
-        match self {
-            MaybeTraitFunctionBody::Some(x) => x.as_syntax_node(),
-            MaybeTraitFunctionBody::None(x) => x.as_syntax_node(),
-        }
-    }
-    fn from_ptr(db: &dyn SyntaxGroup, root: &SyntaxFile, ptr: Self::StablePtr) -> Self {
-        Self::from_syntax_node(db, root.as_syntax_node().lookup_ptr(db, ptr.0))
-    }
-    fn stable_ptr(&self) -> Self::StablePtr {
-        MaybeTraitFunctionBodyPtr(self.as_syntax_node().0.stable_ptr)
-    }
-}
-impl MaybeTraitFunctionBody {
-    #[allow(clippy::match_like_matches_macro)]
-    pub fn is_variant(kind: SyntaxKind) -> bool {
-        match kind {
-            SyntaxKind::ExprBlock => true,
-            SyntaxKind::TerminalSemicolon => true,
-            _ => false,
-        }
+        TraitItemFunctionWithoutBodyPtr(self.node.0.stable_ptr)
     }
 }
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]

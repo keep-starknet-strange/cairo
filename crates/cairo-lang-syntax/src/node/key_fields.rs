@@ -220,7 +220,7 @@ pub fn get_key_fields(kind: SyntaxKind, children: Vec<GreenId>) -> Vec<GreenId> 
         SyntaxKind::TraitItemMissing => {
             vec![]
         }
-        SyntaxKind::TraitItemFunction => {
+        SyntaxKind::TraitItemFunctionWithoutBody => {
             vec![/* declaration */ children[1]]
         }
         SyntaxKind::ItemImpl => {

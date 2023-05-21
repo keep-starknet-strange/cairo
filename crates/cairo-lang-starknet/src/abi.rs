@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use cairo_lang_defs::ids::{LanguageElementId, TraitFunctionId, TraitId};
+use cairo_lang_defs::ids::{LanguageElementId, TraitFunctionWithoutBodyId, TraitId};
 use cairo_lang_diagnostics::{DiagnosticAdded, Maybe};
 use cairo_lang_semantic::db::SemanticGroup;
 use cairo_lang_semantic::items::enm::SemanticEnumEx;
@@ -61,7 +61,7 @@ impl AbiBuilder {
     fn add_function(
         &mut self,
         db: &dyn SemanticGroup,
-        trait_function_id: TraitFunctionId,
+        trait_function_id: TraitFunctionWithoutBodyId,
     ) -> Result<(), ABIError> {
         let state_mutability = if trait_function_has_attr(db, trait_function_id, VIEW_ATTR)? {
             StateMutability::View
@@ -97,7 +97,7 @@ impl AbiBuilder {
     fn add_event(
         &mut self,
         db: &dyn SemanticGroup,
-        trait_function_id: TraitFunctionId,
+        trait_function_id: TraitFunctionWithoutBodyId,
     ) -> Result<(), ABIError> {
         let defs_db = db.upcast();
         let name = trait_function_id.name(defs_db).into();
@@ -216,7 +216,7 @@ fn is_native_type(db: &dyn SemanticGroup, concrete: &ConcreteTypeId) -> bool {
 /// Checks whether the trait function has the given attribute.
 fn trait_function_has_attr(
     db: &dyn SemanticGroup,
-    trait_function_id: TraitFunctionId,
+    trait_function_id: TraitFunctionWithoutBodyId,
     attr: &str,
 ) -> Result<bool, ABIError> {
     Ok(db

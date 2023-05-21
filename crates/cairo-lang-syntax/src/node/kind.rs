@@ -84,7 +84,7 @@ pub enum SyntaxKind {
     TraitBody,
     TraitItemList,
     TraitItemMissing,
-    TraitItemFunction,
+    TraitItemFunctionWithoutBody,
     ItemImpl,
     ImplBody,
     ImplItemList,

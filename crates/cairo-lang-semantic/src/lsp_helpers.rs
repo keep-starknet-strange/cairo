@@ -1,4 +1,4 @@
-use cairo_lang_defs::ids::{ModuleId, TraitFunctionId};
+use cairo_lang_defs::ids::{ModuleId, TraitFunctionWithoutBodyId};
 use cairo_lang_filesystem::ids::CrateId;
 
 use crate::db::SemanticGroup;
@@ -18,7 +18,7 @@ pub fn methods_in_module(
     db: &dyn SemanticGroup,
     module_id: ModuleId,
     type_filter: TypeFilter,
-) -> Vec<TraitFunctionId> {
+) -> Vec<TraitFunctionWithoutBodyId> {
     let mut result = Vec::new();
     for trait_id in db.module_traits_ids(module_id).unwrap_or_default() {
         for (_, trait_function) in db.trait_functions(trait_id).unwrap_or_default() {
@@ -57,7 +57,7 @@ pub fn methods_in_crate(
     db: &dyn SemanticGroup,
     crate_id: CrateId,
     type_filter: TypeFilter,
-) -> Vec<TraitFunctionId> {
+) -> Vec<TraitFunctionWithoutBodyId> {
     let mut result = Vec::new();
     for module_id in db.crate_modules(crate_id).iter() {
         result.extend(methods_in_module(db, *module_id, type_filter.clone()))

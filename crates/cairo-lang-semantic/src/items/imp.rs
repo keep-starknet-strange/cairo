@@ -4,7 +4,7 @@ use std::vec;
 use cairo_lang_debug::DebugWithDb;
 use cairo_lang_defs::ids::{
     FunctionTitleId, GenericParamId, ImplAliasId, ImplDefId, ImplFunctionId, ImplFunctionLongId,
-    LanguageElementId, ModuleId, TopLevelLanguageElementId, TraitFunctionId, TraitId,
+    LanguageElementId, ModuleId, TopLevelLanguageElementId, TraitFunctionWithoutBodyId, TraitId,
 };
 use cairo_lang_diagnostics::{
     skip_diagnostic, Diagnostics, DiagnosticsBuilder, Maybe, ToMaybe, ToOption,
@@ -91,7 +91,7 @@ impl ConcreteImplId {
     pub fn get_impl_function(
         &self,
         db: &dyn SemanticGroup,
-        function: TraitFunctionId,
+        function: TraitFunctionWithoutBodyId,
     ) -> Maybe<Option<ImplFunctionId>> {
         db.impl_function_by_trait_function(self.impl_def_id(db), function)
     }
@@ -497,7 +497,7 @@ pub fn impl_functions(
 pub fn impl_function_by_trait_function(
     db: &dyn SemanticGroup,
     impl_def_id: ImplDefId,
-    trait_function_id: TraitFunctionId,
+    trait_function_id: TraitFunctionWithoutBodyId,
 ) -> Maybe<Option<ImplFunctionId>> {
     let defs_db = db.upcast();
     let name = trait_function_id.name(defs_db);
@@ -820,7 +820,7 @@ pub fn find_possible_impls_at_context(
 /// This function does not change the state of the inference context.
 pub fn can_infer_impl_by_self(
     ctx: &mut ComputationContext<'_>,
-    trait_function_id: TraitFunctionId,
+    trait_function_id: TraitFunctionWithoutBodyId,
     self_ty: TypeId,
     stable_ptr: SyntaxStablePtrId,
 ) -> bool {
@@ -838,7 +838,7 @@ pub fn can_infer_impl_by_self(
 /// snapshots needed to be added to it.
 pub fn infer_impl_by_self(
     ctx: &mut ComputationContext<'_>,
-    trait_function_id: TraitFunctionId,
+    trait_function_id: TraitFunctionWithoutBodyId,
     self_ty: TypeId,
     stable_ptr: SyntaxStablePtrId,
 ) -> Option<(FunctionId, usize)> {
@@ -894,7 +894,7 @@ pub fn get_impl_at_context(
 #[debug_db(dyn SemanticGroup + 'static)]
 pub struct ImplFunctionDeclarationData {
     pub function_declaration_data: FunctionDeclarationData,
-    trait_function_id: Maybe<TraitFunctionId>,
+    trait_function_id: Maybe<TraitFunctionWithoutBodyId>,
 }
 
 /// Query implementation of [crate::db::SemanticGroup::impl_function_signature].
@@ -978,7 +978,7 @@ pub fn impl_function_declaration_inline_config(
 pub fn impl_function_trait_function(
     db: &dyn SemanticGroup,
     impl_function_id: ImplFunctionId,
-) -> Maybe<TraitFunctionId> {
+) -> Maybe<TraitFunctionWithoutBodyId> {
     db.priv_impl_function_declaration_data(impl_function_id)?.trait_function_id
 }
 
@@ -1079,7 +1079,7 @@ fn validate_impl_function_signature(
     signature: &semantic::Signature,
     function_syntax: &ast::FunctionWithBody,
     impl_func_generics: &[GenericParam],
-) -> Maybe<TraitFunctionId> {
+) -> Maybe<TraitFunctionWithoutBodyId> {
     let syntax_db = db.upcast();
     let impl_def_id = impl_function_id.impl_def_id(db.upcast());
     let declaration_data = db.priv_impl_declaration_data(impl_def_id)?;
