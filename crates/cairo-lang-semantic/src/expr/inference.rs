@@ -43,6 +43,9 @@ use crate::{
     GenericParam, LocalVariable, Member, Parameter, Pattern, SemanticObject, Signature, TypeId,
     TypeLongId,
 };
+
+pub mod tree;
+
 /// A type variable, created when a generic type argument is not passed, and thus is not known
 /// yet and needs to be inferred.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
