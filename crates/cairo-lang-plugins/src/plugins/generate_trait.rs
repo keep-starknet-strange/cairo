@@ -1,7 +1,7 @@
 use std::iter::zip;
 use std::sync::Arc;
 
-use cairo_lang_defs::attribute::{AttributeArgVariant, AttributeStructurize};
+use cairo_lang_defs::attribute::{AttributeArgVariant, AttributeStructurize, QueryAttrs};
 use cairo_lang_defs::plugin::{
     DynGeneratedFileAuxData, MacroPlugin, PluginDiagnostic, PluginGeneratedFile, PluginResult,
 };
@@ -10,7 +10,6 @@ use cairo_lang_syntax::node::ast::{
     Expr, GenericArg, ImplItem, ItemImpl, OptionWrappedGenericParamList,
 };
 use cairo_lang_syntax::node::db::SyntaxGroup;
-use cairo_lang_syntax::node::helpers::QueryAttrs;
 use cairo_lang_syntax::node::{ast, Terminal, TypedSyntaxNode};
 use indoc::formatdoc;
 use itertools::Itertools;

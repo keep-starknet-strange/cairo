@@ -1,10 +1,11 @@
 use std::sync::Arc;
 
-use cairo_lang_defs::attribute::{AttributeArg, AttributeArgVariant, AttributeStructurize};
+use cairo_lang_defs::attribute::{
+    AttributeArg, AttributeArgVariant, AttributeStructurize, QueryAttrs,
+};
 use cairo_lang_defs::plugin::{DynGeneratedFileAuxData, PluginGeneratedFile, PluginResult};
 use cairo_lang_semantic::plugin::TrivialPluginAuxData;
 use cairo_lang_syntax::node::db::SyntaxGroup;
-use cairo_lang_syntax::node::helpers::QueryAttrs;
 use cairo_lang_syntax::node::{ast, TypedSyntaxNode};
 use indoc::formatdoc;
 
@@ -164,7 +165,10 @@ pub fn handle_struct(db: &dyn SyntaxGroup, struct_ast: ast::ItemStruct) -> Plugi
 }
 
 /// Returns true if the type should be derived as a storage_access.
-pub fn derive_storage_access_needed<T: QueryAttrs>(with_attrs: &T, db: &dyn SyntaxGroup) -> bool {
+pub fn derive_storage_access_needed<T: QueryAttrs<AttrType = ast::Attribute>>(
+    with_attrs: &T,
+    db: &dyn SyntaxGroup,
+) -> bool {
     with_attrs.query_attr(db, "derive").into_iter().any(|attr| {
         let attr = attr.structurize(db);
         for arg in &attr.args {

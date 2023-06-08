@@ -1,5 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
+use cairo_lang_defs::attribute::QueryAttrs;
 use cairo_lang_defs::ids::{
     FreeFunctionId, ImplDefId, ImplFunctionId, LanguageElementId, ModuleId, SubmoduleId,
     TopLevelLanguageElementId, TraitFunctionId, TraitId,
@@ -13,7 +14,6 @@ use cairo_lang_semantic::types::{ConcreteEnumLongId, ConcreteStructLongId};
 use cairo_lang_semantic::{
     ConcreteTypeId, GenericArgumentId, GenericParam, Mutability, TypeId, TypeLongId,
 };
-use cairo_lang_syntax::node::helpers::QueryAttrs;
 use cairo_lang_syntax::node::Terminal;
 use cairo_lang_utils::{extract_matches, try_extract_matches};
 use itertools::zip_eq;
@@ -232,8 +232,9 @@ impl AbiBuilder {
         // If the trait is marked as starknet::interface, add the interface. Otherwise, add the
         // functions as external functions.
         let trait_id = trt.trait_id(db);
-        let attrs = db.trait_attributes(trait_id).map_err(|_| ABIError::CompilationError)?;
-        if attrs.into_iter().any(|x| x.id == INTERFACE_ATTR) {
+        // let attrs = db.trait_attributes(trait_id).map_err(|_| ABIError::CompilationError)?;
+        if trait_id.has_attr(INTERFACE_ATTR) {
+            // if attrs.into_iter().any(|x| x.id == INTERFACE_ATTR) {
             self.abi
                 .items
                 .push(Item::Impl(Imp { name: impl_name.into(), interface_name: trt_path }));

@@ -35,6 +35,7 @@ use cairo_lang_utils::{define_short_id, OptionFrom};
 use salsa;
 use smol_str::SmolStr;
 
+use crate::attribute::{Attribute, QueryAttrs};
 use crate::db::DefsGroup;
 
 // A trait for an id for a language element.
@@ -426,6 +427,7 @@ define_language_element_id!(
     name
 );
 define_language_element_id!(TraitId, TraitLongId, ast::ItemTrait, lookup_intern_trait, name);
+
 define_language_element_id_partial!(
     TraitFunctionId,
     TraitFunctionLongId,

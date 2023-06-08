@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use cairo_lang_defs::attribute::QueryAttrs;
 use cairo_lang_defs::db::DefsGroup;
 use cairo_lang_defs::ids::ModuleId;
 use cairo_lang_defs::plugin::{
@@ -8,7 +9,6 @@ use cairo_lang_defs::plugin::{
 use cairo_lang_diagnostics::DiagnosticEntry;
 use cairo_lang_syntax::node::ast;
 use cairo_lang_syntax::node::db::SyntaxGroup;
-use cairo_lang_syntax::node::helpers::QueryAttrs;
 use indoc::indoc;
 use pretty_assertions::assert_eq;
 use test_log::test;

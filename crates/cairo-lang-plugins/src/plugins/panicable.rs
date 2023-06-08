@@ -1,14 +1,13 @@
 use std::sync::Arc;
 
 use cairo_lang_defs::attribute::{
-    Attribute, AttributeArg, AttributeArgVariant, AttributeStructurize,
+    Attribute, AttributeArg, AttributeArgVariant, AttributeStructurize, QueryAttrs,
 };
 use cairo_lang_defs::plugin::{
     DynGeneratedFileAuxData, MacroPlugin, PluginDiagnostic, PluginGeneratedFile, PluginResult,
 };
 use cairo_lang_semantic::plugin::{AsDynMacroPlugin, SemanticPlugin, TrivialPluginAuxData};
 use cairo_lang_syntax::node::db::SyntaxGroup;
-use cairo_lang_syntax::node::helpers::QueryAttrs;
 use cairo_lang_syntax::node::{ast, Terminal, TypedSyntaxNode};
 use cairo_lang_utils::try_extract_matches;
 use itertools::Itertools;

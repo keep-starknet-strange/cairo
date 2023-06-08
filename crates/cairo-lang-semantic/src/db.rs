@@ -1113,3 +1113,12 @@ fn get_resolver_datas(id: LookupItemId, db: &dyn SemanticGroup) -> Vec<Arc<Resol
     .flatten()
     .collect()
 }
+
+impl QueryAttrs for TraitId {
+    type AttrType = Attribute;
+    type DbType = dyn SemanticGroup;
+
+    fn attributes_elements(&self, db: &Self::DbType) -> Vec<Self::AttrType> {
+        db.trait_attributes(*self)
+    }
+}

@@ -1,4 +1,6 @@
-use cairo_lang_defs::attribute::{AttributeArg, AttributeArgVariant, AttributeStructurize};
+use cairo_lang_defs::attribute::{
+    AttributeArg, AttributeArgVariant, AttributeStructurize, QueryAttrs,
+};
 use cairo_lang_defs::plugin::{
     DynGeneratedFileAuxData, PluginDiagnostic, PluginGeneratedFile, PluginResult,
 };
@@ -6,7 +8,6 @@ use cairo_lang_semantic::patcher::{ModifiedNode, PatchBuilder, RewriteNode};
 use cairo_lang_semantic::plugin::DynPluginAuxData;
 use cairo_lang_syntax::node::ast::{self, OptionWrappedGenericParamList};
 use cairo_lang_syntax::node::db::SyntaxGroup;
-use cairo_lang_syntax::node::helpers::QueryAttrs;
 use cairo_lang_syntax::node::{Terminal, TypedSyntaxNode};
 use indoc::indoc;
 use serde::{Deserialize, Serialize};
@@ -258,7 +259,10 @@ pub fn handle_enum(db: &dyn SyntaxGroup, enum_ast: ast::ItemEnum) -> PluginResul
 }
 
 /// Returns true if the type should be derived as an event.
-pub fn derive_event_needed<T: QueryAttrs>(with_attrs: &T, db: &dyn SyntaxGroup) -> bool {
+pub fn derive_event_needed<T: QueryAttrs<AttrType = ast::Attribute>>(
+    with_attrs: &T,
+    db: &dyn SyntaxGroup,
+) -> bool {
     with_attrs.query_attr(db, "derive").into_iter().any(|attr| {
         let attr = attr.structurize(db);
         for arg in &attr.args {

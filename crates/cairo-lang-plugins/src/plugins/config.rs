@@ -1,13 +1,12 @@
 use std::sync::Arc;
 
 use cairo_lang_defs::attribute::{
-    Attribute, AttributeArg, AttributeArgVariant, AttributeStructurize,
+    Attribute, AttributeArg, AttributeArgVariant, AttributeStructurize, QueryAttrs,
 };
 use cairo_lang_defs::plugin::{MacroPlugin, PluginDiagnostic, PluginResult};
 use cairo_lang_filesystem::cfg::{Cfg, CfgSet};
 use cairo_lang_semantic::plugin::{AsDynMacroPlugin, SemanticPlugin};
 use cairo_lang_syntax::node::db::SyntaxGroup;
-use cairo_lang_syntax::node::helpers::QueryAttrs;
 use cairo_lang_syntax::node::{ast, Terminal};
 
 /// Plugin that enables ignoring modules not involved in the current config.
