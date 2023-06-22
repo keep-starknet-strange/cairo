@@ -105,8 +105,8 @@ impl From<Felt252> for Arg {
 /// Builds hints_dict required in cairo_vm::types::program::Program from instructions.
 pub fn build_hints_dict<'b>(
     instructions: impl Iterator<Item = &'b Instruction>,
-) -> (HashMap<usize, Vec<HintParams>>, HashMap<String, Hint>) {
-    let mut hints_dict: HashMap<usize, Vec<HintParams>> = HashMap::new();
+) -> (HashMap<u64, Vec<HintParams>>, HashMap<String, Hint>) {
+    let mut hints_dict: HashMap<u64, Vec<HintParams>> = HashMap::new();
     let mut string_to_hint: HashMap<String, Hint> = HashMap::new();
 
     let mut hint_offset = 0;
@@ -121,7 +121,7 @@ pub fn build_hints_dict<'b>(
             hints_dict
                 .insert(hint_offset, instruction.hints.iter().map(hint_to_hint_params).collect());
         }
-        hint_offset += instruction.body.op_size();
+        hint_offset += instruction.body.op_size() as u64;
     }
     (hints_dict, string_to_hint)
 }
@@ -203,7 +203,7 @@ impl SierraCasmRunner {
         &self,
         func: &Function,
         hint_processor: &mut dyn HintProcessor,
-        hints_dict: HashMap<usize, Vec<HintParams>>,
+        hints_dict: HashMap<u64, Vec<HintParams>>,
         instructions: Instructions,
         builtins: Vec<BuiltinName>,
     ) -> Result<RunResult, RunnerError>

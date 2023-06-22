@@ -1,14 +1,13 @@
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
 #[cfg(feature = "std")]
 use std::collections::HashMap;
-
-#[cfg(not(feature = "std"))]
-use alloc::{vec::Vec};
-#[cfg(not(feature = "std"))]
-use hashbrown::HashMap;
 
 use cairo_felt::Felt252;
 use cairo_vm::types::relocatable::{MaybeRelocatable, Relocatable};
 use cairo_vm::vm::vm_core::VirtualMachine;
+#[cfg(not(feature = "std"))]
+use hashbrown::HashMap;
 
 /// Stores the data of a specific dictionary.
 pub struct DictTrackerExecScope {
@@ -41,7 +40,10 @@ impl DictManagerExecScope {
         let dict_segment = vm.add_memory_segment();
         assert!(
             self.trackers
-                .insert(dict_segment.segment_index, DictTrackerExecScope::new(self.trackers.len()))
+                .insert(
+                    dict_segment.segment_index as isize,
+                    DictTrackerExecScope::new(self.trackers.len())
+                )
                 .is_none(),
             "Segment index already in use."
         );
@@ -51,7 +53,7 @@ impl DictManagerExecScope {
     /// Returns a reference for a dict tracker corresponding to a given pointer to a dict segment.
     fn get_dict_tracker(&self, dict_end: Relocatable) -> &DictTrackerExecScope {
         self.trackers
-            .get(&dict_end.segment_index)
+            .get(&(dict_end.segment_index as isize))
             .expect("The given value does not point to a known dictionary.")
     }
 
@@ -59,7 +61,7 @@ impl DictManagerExecScope {
     /// segment.
     fn get_dict_tracker_mut(&mut self, dict_end: Relocatable) -> &mut DictTrackerExecScope {
         self.trackers
-            .get_mut(&dict_end.segment_index)
+            .get_mut(&(dict_end.segment_index as isize))
             .expect("The given value does not point to a known dictionary.")
     }
 

@@ -342,12 +342,15 @@ dependencies = [
 [[package]]
 name = "cairo-felt"
 version = "0.6.0"
-source = "git+https://github.com/keep-starknet-strange/cairo-rs?branch=no_std-support-with-cairo-1#a4865bf0a0885191dce50ea22ae40b4d3f8998cc"
+source = "git+https://github.com/keep-starknet-strange/cairo-rs?branch=lucas/scale-codec#4b3eddd111ef794be1ccbd67c212828bf216a48e"
 dependencies = [
+ "hex",
  "lazy_static",
  "num-bigint",
  "num-integer",
  "num-traits 0.2.15",
+ "parity-scale-codec",
+ "scale-info",
  "serde",
 ]
 
@@ -1014,7 +1017,7 @@ dependencies = [
 [[package]]
 name = "cairo-take_until_unbalanced"
 version = "0.29.0"
-source = "git+https://github.com/keep-starknet-strange/cairo-rs?branch=no_std-support-with-cairo-1#a4865bf0a0885191dce50ea22ae40b4d3f8998cc"
+source = "git+https://github.com/keep-starknet-strange/cairo-rs?branch=lucas/scale-codec#4b3eddd111ef794be1ccbd67c212828bf216a48e"
 dependencies = [
  "nom",
 ]
@@ -1031,7 +1034,7 @@ dependencies = [
 [[package]]
 name = "cairo-vm"
 version = "0.6.0"
-source = "git+https://github.com/keep-starknet-strange/cairo-rs?branch=no_std-support-with-cairo-1#a4865bf0a0885191dce50ea22ae40b4d3f8998cc"
+source = "git+https://github.com/keep-starknet-strange/cairo-rs?branch=lucas/scale-codec#4b3eddd111ef794be1ccbd67c212828bf216a48e"
 dependencies = [
  "anyhow",
  "bincode",
@@ -1320,6 +1323,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ebcda35c7a396850a55ffeac740804b40ffec779b98fffbb1738f4033f0ee79e"
 dependencies = [
  "derive_builder_core",
+ "syn 1.0.103",
+]
+
+[[package]]
+name = "derive_more"
+version = "0.99.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4fb810d30a7c1953f91334de7244731fc3f3c10d7fe163338a35b9f640960321"
+dependencies = [
+ "proc-macro2",
+ "quote",
  "syn 1.0.103",
 ]
 
@@ -2176,6 +2190,7 @@ dependencies = [
  "arrayvec",
  "byte-slice-cast",
  "impl-trait-for-tuples",
+ "parity-scale-codec-derive",
 ]
 
 [[package]]
@@ -2609,6 +2624,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "93fc1dc3aaa9bfed95e02e6eadabb4baf7e3078b0bd1b4d7b6b0b68378900502"
 dependencies = [
  "winapi-util",
+]
+
+[[package]]
+name = "scale-info"
+version = "2.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ad560913365790f17cbf12479491169f01b9d46d29cfc7422bf8c64bdc61b731"
+dependencies = [
+ "cfg-if",
+ "derive_more",
+ "parity-scale-codec",
 ]
 
 [[package]]

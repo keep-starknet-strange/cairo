@@ -14,7 +14,7 @@ use cairo_lang_vm_utils::{
 };
 use cairo_vm::hint_processor::hint_processor_definition::{HintProcessor, HintReference};
 use cairo_vm::serde::deserialize_program::{
-    ApTracking, BuiltinName, FlowTrackingData, HintParams, ReferenceManager,
+    ApTracking, BuiltinName, FlowTrackingData, HintParams, ReferenceIds, ReferenceManager,
 };
 use cairo_vm::types::exec_scope::ExecutionScopes;
 use cairo_vm::types::program::Program;
@@ -42,7 +42,7 @@ pub fn hint_to_hint_params(hint: &Hint) -> HintParams {
         accessible_scopes: vec![],
         flow_tracking_data: FlowTrackingData {
             ap_tracking: ApTracking::new(),
-            reference_ids: HashMap::new(),
+            reference_ids: ReferenceIds::new(),
         },
     }
 }
@@ -259,7 +259,7 @@ impl HintProcessor for CairoHintProcessor<'_> {
         &self,
         hint_code: &str,
         _ap_tracking_data: &ApTracking,
-        _reference_ids: &HashMap<String, usize>,
+        _reference_ids: &HashMap<String, u64>,
         _references: &[HintReference],
     ) -> Result<Box<dyn Any>, VirtualMachineError> {
         Ok(Box::new(self.string_to_hint[hint_code].clone()))
@@ -1210,7 +1210,7 @@ pub fn run_function<'a, 'b: 'a, Instructions>(
         context: RunFunctionContext<'_>,
     ) -> Result<(), Box<CairoRunError>>,
     hint_processor: &mut dyn HintProcessor,
-    hints_dict: HashMap<usize, Vec<HintParams>>,
+    hints_dict: HashMap<u64, Vec<HintParams>>,
 ) -> Result<RunFunctionRes, Box<CairoRunError>>
 where
     Instructions: Iterator<Item = &'a Instruction> + Clone,
