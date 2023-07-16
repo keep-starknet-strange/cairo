@@ -427,7 +427,7 @@ dependencies = [
 [[package]]
 name = "cairo-felt"
 version = "0.8.1"
-source = "git+https://github.com/keep-starknet-strange/cairo-rs?branch=no_std-support-with-cairo-1-rebase#f6cae2b60a1c7da90d85c251c518a69176ed976c"
+source = "git+https://github.com/keep-starknet-strange/cairo-rs?branch=no_std-support-with-cairo-1-rebase#ca5d0a445232a420ce02e7c697fbc6ab9b4416ee"
 dependencies = [
  "lazy_static",
  "num-bigint",
@@ -1096,7 +1096,7 @@ dependencies = [
 [[package]]
 name = "cairo-take_until_unbalanced"
 version = "0.29.0"
-source = "git+https://github.com/keep-starknet-strange/cairo-rs?branch=no_std-support-with-cairo-1-rebase#f6cae2b60a1c7da90d85c251c518a69176ed976c"
+source = "git+https://github.com/keep-starknet-strange/cairo-rs?branch=no_std-support-with-cairo-1-rebase#ca5d0a445232a420ce02e7c697fbc6ab9b4416ee"
 dependencies = [
  "nom",
 ]
@@ -1113,7 +1113,7 @@ dependencies = [
 [[package]]
 name = "cairo-vm"
 version = "0.8.1"
-source = "git+https://github.com/keep-starknet-strange/cairo-rs?branch=no_std-support-with-cairo-1-rebase#f6cae2b60a1c7da90d85c251c518a69176ed976c"
+source = "git+https://github.com/keep-starknet-strange/cairo-rs?branch=no_std-support-with-cairo-1-rebase#ca5d0a445232a420ce02e7c697fbc6ab9b4416ee"
 dependencies = [
  "anyhow",
  "bincode",
