@@ -9,12 +9,14 @@ use ark_std::UniformRand;
 use cairo_felt::{felt_str as felt252_str, Felt252};
 use cairo_lang_casm::hints::{CoreHint, DeprecatedHint, Hint, StarknetHint};
 use cairo_lang_casm::instructions::Instruction;
-use cairo_lang_casm::operand::{
-    BinOpOperand, CellRef, DerefOrImmediate, Operation, Register, ResOperand,
-};
+use cairo_lang_casm::operand::{CellRef, DerefOrImmediate, Operation, Register, ResOperand};
 use cairo_lang_sierra::ids::FunctionId;
-use cairo_lang_utils::extract_matches;
-use cairo_vm::hint_processor::hint_processor_definition::{HintProcessor, HintReference};
+use cairo_lang_utils::short_string::as_cairo_short_string;
+use cairo_lang_vm_utils::{
+    execute_core_hint_base, extract_buffer, get_maybe, get_ptr, insert_value_to_cellref,
+    DictManagerExecScope, DictSquashExecScope,
+};
+use cairo_vm::hint_processor::hint_processor_definition::{HintProcessorLogic, HintReference};
 use cairo_vm::serde::deserialize_program::{
     ApTracking, BuiltinName, FlowTrackingData, HintParams, ReferenceManager,
 };
@@ -25,28 +27,17 @@ use cairo_vm::vm::errors::cairo_run_errors::CairoRunError;
 use cairo_vm::vm::errors::hint_errors::HintError;
 use cairo_vm::vm::errors::memory_errors::MemoryError;
 use cairo_vm::vm::errors::vm_errors::VirtualMachineError;
-use cairo_vm::vm::runners::cairo_runner::{CairoRunner, RunResources};
+use cairo_vm::vm::runners::cairo_runner::{CairoRunner, ResourceTracker, RunResources};
 use cairo_vm::vm::vm_core::VirtualMachine;
-use dict_manager::DictManagerExecScope;
 use num_bigint::BigUint;
 use num_integer::Integer;
 use num_traits::{FromPrimitive, ToPrimitive, Zero};
 use {ark_secp256k1 as secp256k1, ark_secp256r1 as secp256r1};
 
-use self::dict_manager::DictSquashExecScope;
-use crate::short_string::as_cairo_short_string;
 use crate::{Arg, RunResultValue, SierraCasmRunner};
 
 #[cfg(test)]
 mod test;
-
-mod dict_manager;
-
-// TODO(orizi): This def is duplicated.
-/// Returns the Beta value of the Starkware elliptic curve.
-fn get_beta() -> Felt252 {
-    felt252_str!("3141592653589793238462643383279502884197169399375105820974944592307816406665")
-}
 
 #[derive(MontConfig)]
 #[modulus = "3618502788666131213697322783095070105623107215331596699973092056135872020481"]
@@ -93,6 +84,28 @@ pub struct CairoHintProcessor<'a> {
     pub string_to_hint: HashMap<String, Hint>,
     // The starknet state.
     pub starknet_state: StarknetState,
+    // The resources consumed during the run.
+    pub run_resources: RunResources,
+}
+impl<'a> ResourceTracker for CairoHintProcessor<'a> {
+    fn consumed(&self) -> bool {
+        self.run_resources.consumed()
+    }
+    fn consume_step(&mut self) {
+        self.run_resources.consume_step()
+    }
+
+    fn get_n_steps(&self) -> Option<usize> {
+        self.run_resources.get_n_steps()
+    }
+
+    fn run_resources(&self) -> &RunResources {
+        &self.run_resources
+    }
+}
+
+fn get_beta() -> Felt252 {
+    felt252_str!("3141592653589793238462643383279502884197169399375105820974944592307816406665")
 }
 
 impl<'a> CairoHintProcessor<'a> {
@@ -120,7 +133,13 @@ impl<'a> CairoHintProcessor<'a> {
             }
             hint_offset += instruction.body.op_size();
         }
-        CairoHintProcessor { runner, hints_dict, string_to_hint, starknet_state }
+        CairoHintProcessor {
+            runner,
+            hints_dict,
+            string_to_hint,
+            starknet_state,
+            run_resources: RunResources::default(),
+        }
     }
 }
 
@@ -220,15 +239,6 @@ fn get_cell_maybe(
     get_maybe_from_addr(vm, cell_ref_to_relocatable(cell, vm))
 }
 
-/// Fetches the value of a cell plus an offset from the vm, useful for pointers.
-fn get_ptr(
-    vm: &VirtualMachine,
-    cell: &CellRef,
-    offset: &Felt252,
-) -> Result<Relocatable, VirtualMachineError> {
-    Ok((vm.get_relocatable(cell_ref_to_relocatable(cell, vm))? + offset)?)
-}
-
 /// Fetches the value of a pointer described by the value at `cell` plus an offset from the vm.
 fn get_double_deref_val(
     vm: &VirtualMachine,
@@ -296,37 +306,7 @@ macro_rules! deduct_gas {
     };
 }
 
-/// Fetches the maybe relocatable value of `res_operand` from the vm.
-fn get_maybe(
-    vm: &VirtualMachine,
-    res_operand: &ResOperand,
-) -> Result<MaybeRelocatable, VirtualMachineError> {
-    match res_operand {
-        ResOperand::Deref(cell) => get_cell_maybe(vm, cell),
-        ResOperand::DoubleDeref(cell, offset) => {
-            get_double_deref_maybe(vm, cell, &(*offset).into())
-        }
-        ResOperand::Immediate(x) => Ok(Felt252::from(x.value.clone()).into()),
-        ResOperand::BinOp(op) => {
-            let a = get_cell_maybe(vm, &op.a)?;
-            let b = match &op.b {
-                DerefOrImmediate::Deref(cell) => get_cell_val(vm, cell)?,
-                DerefOrImmediate::Immediate(x) => Felt252::from(x.value.clone()),
-            };
-            Ok(match op.op {
-                Operation::Add => a.add_int(&b)?,
-                Operation::Mul => match a {
-                    MaybeRelocatable::RelocatableValue(_) => {
-                        panic!("mul not implemented for relocatable values")
-                    }
-                    MaybeRelocatable::Int(a) => (a * b).into(),
-                },
-            })
-        }
-    }
-}
-
-impl HintProcessor for CairoHintProcessor<'_> {
+impl HintProcessorLogic for CairoHintProcessor<'_> {
     /// Trait function to execute a given hint in the hint processor.
     fn execute_hint(
         &mut self,
@@ -334,7 +314,6 @@ impl HintProcessor for CairoHintProcessor<'_> {
         exec_scopes: &mut ExecutionScopes,
         hint_data: &Box<dyn Any>,
         _constants: &HashMap<String, Felt252>,
-        _run_resources: &mut RunResources,
     ) -> Result<(), HintError> {
         let hint = hint_data.downcast_ref::<Hint>().unwrap();
         let hint = match hint {
@@ -444,6 +423,15 @@ impl VMWrapper for VirtualMachine {
     fn vm(&mut self) -> &mut VirtualMachine {
         self
     }
+}
+
+/// Extracts a parameter assumed to be a buffer, and converts it into a relocatable.
+fn extract_relocatable(
+    vm: &VirtualMachine,
+    buffer: &ResOperand,
+) -> Result<Relocatable, VirtualMachineError> {
+    let (base, offset) = extract_buffer(buffer);
+    get_ptr(vm, base, &offset)
 }
 
 /// Creates a new segment in the VM memory and writes data to it, returing the start and end
@@ -1316,21 +1304,6 @@ fn get_secp256r1_exec_scope(
 
 // ---
 
-pub fn execute_core_hint_base(
-    vm: &mut VirtualMachine,
-    exec_scopes: &mut ExecutionScopes,
-    core_hint_base: &cairo_lang_casm::hints::CoreHintBase,
-) -> Result<(), HintError> {
-    match core_hint_base {
-        cairo_lang_casm::hints::CoreHintBase::Core(core_hint) => {
-            execute_core_hint(vm, exec_scopes, core_hint)
-        }
-        cairo_lang_casm::hints::CoreHintBase::Deprecated(deprecated_hint) => {
-            execute_deprecated_hint(vm, exec_scopes, deprecated_hint)
-        }
-    }
-}
-
 pub fn execute_deprecated_hint(
     vm: &mut VirtualMachine,
     exec_scopes: &mut ExecutionScopes,
@@ -1854,18 +1827,6 @@ fn vm_get_range(
     Ok(values)
 }
 
-/// Extracts a parameter assumed to be a buffer.
-fn extract_buffer(buffer: &ResOperand) -> (&CellRef, Felt252) {
-    let (cell, base_offset) = match buffer {
-        ResOperand::Deref(cell) => (cell, 0.into()),
-        ResOperand::BinOp(BinOpOperand { op: Operation::Add, a, b }) => {
-            (a, extract_matches!(b, DerefOrImmediate::Immediate).clone().value.into())
-        }
-        _ => panic!("Illegal argument for a buffer."),
-    };
-    (cell, base_offset)
-}
-
 /// Provides context for the `additional_initialization` callback function of [run_function].
 pub struct RunFunctionContext<'a> {
     pub vm: &'a mut VirtualMachine,
@@ -1914,9 +1875,7 @@ pub fn run_function<'a, 'b: 'a, Instructions: Iterator<Item = &'a Instruction> +
 
     additional_initialization(RunFunctionContext { vm: &mut vm, data_len })?;
 
-    runner
-        .run_until_pc(end, &mut RunResources::default(), &mut vm, &mut hint_processor)
-        .map_err(CairoRunError::from)?;
+    runner.run_until_pc(end, &mut vm, &mut hint_processor).map_err(CairoRunError::from)?;
     runner.end_run(true, false, &mut vm, &mut hint_processor).map_err(CairoRunError::from)?;
     runner.relocate(&mut vm, true).map_err(CairoRunError::from)?;
     Ok((

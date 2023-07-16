@@ -28,13 +28,12 @@ use cairo_lang_utils::extract_matches;
 use cairo_lang_utils::ordered_hash_map::OrderedHashMap;
 use cairo_vm::serde::deserialize_program::BuiltinName;
 use cairo_vm::vm::errors::cairo_run_errors::CairoRunError;
-pub use casm_run::StarknetState;
+pub use casm_run::{CairoHintProcessor, StarknetState};
 use itertools::chain;
 use num_traits::ToPrimitive;
-use thiserror::Error;
+use thiserror_no_std::Error;
 
 pub mod casm_run;
-pub mod short_string;
 
 #[derive(Debug, Error)]
 pub enum RunnerError {

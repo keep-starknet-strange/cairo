@@ -8,7 +8,7 @@ use cairo_lang_sierra::ids::VarId;
 use cairo_lang_sierra::program::{BranchTarget, Invocation, Program, Statement, StatementIdx};
 use cairo_lang_sierra::program_registry::{ProgramRegistry, ProgramRegistryError};
 use itertools::zip_eq;
-use thiserror::Error;
+use thiserror_no_std::Error;
 
 use crate::annotations::{AnnotationError, ProgramAnnotations, StatementAnnotations};
 use crate::invocations::{

@@ -17,7 +17,7 @@ use cairo_lang_sierra_gas::core_libfunc_cost::{core_libfunc_cost, InvocationCost
 use cairo_lang_sierra_gas::objects::ConstCost;
 use cairo_lang_utils::ordered_hash_map::OrderedHashMap;
 use itertools::{chain, zip_eq, Itertools};
-use thiserror::Error;
+use thiserror_no_std::Error;
 use {cairo_lang_casm, cairo_lang_sierra};
 
 use crate::environment::frame_state::{FrameState, FrameStateError};

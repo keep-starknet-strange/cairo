@@ -1,19 +1,25 @@
+#[cfg(not(feature = "std"))]
+use alloc::format;
+#[cfg(not(feature = "std"))]
+use alloc::string::{String, ToString};
+#[cfg(not(feature = "std"))]
+use core::fmt::{Display, Formatter};
+#[cfg(feature = "std")]
 use std::fmt::{Display, Formatter};
 
 use indoc::formatdoc;
 use parity_scale_codec_derive::{Decode, Encode};
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::operand::{CellRef, DerefOrImmediate, ResOperand};
-
 #[cfg(test)]
 mod test;
 
 // Represents a cairo hint.
 // Note: Hint encoding should be backwards-compatible. This is an API guarantee.
 // For example, new variants should have new `index`.
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone, Encode, Decode, JsonSchema)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone, Encode, Decode)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(untagged)]
 pub enum Hint {
     #[codec(index = 0)]
@@ -55,7 +61,8 @@ impl PythonicHint for Hint {
 }
 
 /// Represents a hint that triggers a system call.
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone, Encode, Decode, JsonSchema)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone, Encode, Decode)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub enum StarknetHint {
     #[codec(index = 0)]
     SystemCall { system: ResOperand },
@@ -95,7 +102,8 @@ pub enum StarknetHint {
 }
 
 // Represents a cairo core hint.
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone, Encode, Decode, JsonSchema)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone, Encode, Decode)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(untagged)]
 pub enum CoreHintBase {
     #[codec(index = 0)]
@@ -115,7 +123,8 @@ impl From<DeprecatedHint> for CoreHintBase {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone, Encode, Decode, JsonSchema)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone, Encode, Decode)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub enum CoreHint {
     #[codec(index = 0)]
     AllocSegment { dst: CellRef },
@@ -261,7 +270,8 @@ pub enum CoreHint {
 
 /// Represents a deprecated hint which is kept for backward compatibility of previously deployed
 /// contracts.
-#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone, Encode, Decode, JsonSchema)]
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone, Encode, Decode)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub enum DeprecatedHint {
     /// Asserts that the current access indices list is empty (after the loop).
     #[codec(index = 0)]
@@ -290,7 +300,7 @@ pub enum DeprecatedHint {
 
 struct DerefOrImmediateFormatter<'a>(&'a DerefOrImmediate);
 impl<'a> Display for DerefOrImmediateFormatter<'a> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
         match self.0 {
             DerefOrImmediate::Deref(d) => write!(f, "memory{d}"),
             DerefOrImmediate::Immediate(i) => write!(f, "{}", i.value),
@@ -300,7 +310,7 @@ impl<'a> Display for DerefOrImmediateFormatter<'a> {
 
 struct ResOperandFormatter<'a>(&'a ResOperand);
 impl<'a> Display for ResOperandFormatter<'a> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
         match self.0 {
             ResOperand::Deref(d) => write!(f, "memory{d}"),
             ResOperand::DoubleDeref(d, i) => write!(f, "memory[memory{d} + {i}]"),

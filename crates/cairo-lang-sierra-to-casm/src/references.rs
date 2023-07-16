@@ -6,7 +6,7 @@ use cairo_lang_casm::operand::{CellRef, Register};
 use cairo_lang_sierra::ids::{ConcreteTypeId, VarId};
 use cairo_lang_sierra::program::{Function, StatementIdx};
 use cairo_lang_utils::casts::IntoOrPanic;
-use thiserror::Error;
+use thiserror_no_std::Error;
 use {cairo_lang_casm, cairo_lang_sierra};
 
 use crate::invocations::InvocationError;
