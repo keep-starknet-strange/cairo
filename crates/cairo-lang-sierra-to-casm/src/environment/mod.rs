@@ -1,6 +1,6 @@
 use cairo_lang_sierra::program::StatementIdx;
 use frame_state::{FrameState, FrameStateError};
-use thiserror_no_std::Error;
+use thiserror::Error;
 
 use self::frame_state::validate_final_frame_state;
 use self::gas_wallet::GasWallet;

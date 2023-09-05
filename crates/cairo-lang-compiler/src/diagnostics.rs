@@ -6,7 +6,7 @@ use cairo_lang_lowering::db::LoweringGroup;
 use cairo_lang_parser::db::ParserGroup;
 use cairo_lang_semantic::db::SemanticGroup;
 use itertools::chain;
-use thiserror_no_std::Error;
+use thiserror::Error;
 
 use crate::db::RootDatabase;
 

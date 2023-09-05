@@ -9,7 +9,7 @@ use cairo_lang_utils::ordered_hash_map::OrderedHashMap;
 use serde::{Deserialize, Serialize};
 use smol_str::SmolStr;
 
-#[derive(thiserror_no_std::Error, Debug)]
+#[derive(thiserror::Error, Debug)]
 pub enum DeserializationError {
     #[error(transparent)]
     TomlError(#[from] toml::de::Error),

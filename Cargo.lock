@@ -450,7 +450,7 @@ dependencies = [
 [[package]]
 name = "cairo-lang-casm"
 version = "2.1.0"
-source = "git+https://github.com/keep-starknet-strange/cairo?branch=no_std-support-8bbf530#0e591510d73be8d737b0832dc9215ff409e0ed15"
+source = "git+https://github.com/keep-starknet-strange/cairo?branch=no_std-support-8bbf530#1d03d228c3bee4c7d641a100696fe6b043637b1d"
 dependencies = [
  "cairo-lang-utils 2.1.0 (git+https://github.com/keep-starknet-strange/cairo?branch=no_std-support-8bbf530)",
  "hashbrown 0.14.0",
@@ -471,13 +471,12 @@ dependencies = [
  "itertools",
  "num-bigint",
  "serde",
- "thiserror-no-std",
 ]
 
 [[package]]
 name = "cairo-lang-casm-contract-class"
 version = "2.1.0"
-source = "git+https://github.com/keep-starknet-strange/cairo?branch=no_std-support-8bbf530#0e591510d73be8d737b0832dc9215ff409e0ed15"
+source = "git+https://github.com/keep-starknet-strange/cairo?branch=no_std-support-8bbf530#1d03d228c3bee4c7d641a100696fe6b043637b1d"
 dependencies = [
  "cairo-lang-casm 2.1.0 (git+https://github.com/keep-starknet-strange/cairo?branch=no_std-support-8bbf530)",
  "cairo-lang-utils 2.1.0 (git+https://github.com/keep-starknet-strange/cairo?branch=no_std-support-8bbf530)",
@@ -509,7 +508,7 @@ dependencies = [
  "salsa",
  "smol_str",
  "test-log",
- "thiserror-no-std",
+ "thiserror",
 ]
 
 [[package]]
@@ -741,7 +740,7 @@ dependencies = [
  "serde",
  "smol_str",
  "test-log",
- "thiserror-no-std",
+ "thiserror",
  "toml",
 ]
 
@@ -779,7 +778,7 @@ dependencies = [
  "num-traits 0.2.16",
  "pretty_assertions",
  "test-case",
- "thiserror-no-std",
+ "thiserror",
 ]
 
 [[package]]
@@ -853,7 +852,7 @@ dependencies = [
  "itertools",
  "test-case",
  "test-log",
- "thiserror-no-std",
+ "thiserror",
 ]
 
 [[package]]
@@ -871,7 +870,7 @@ dependencies = [
  "pretty_assertions",
  "test-case",
  "test-log",
- "thiserror-no-std",
+ "thiserror",
 ]
 
 [[package]]
@@ -927,7 +926,7 @@ dependencies = [
  "pretty_assertions",
  "test-case",
  "test-log",
- "thiserror-no-std",
+ "thiserror",
 ]
 
 [[package]]
@@ -980,7 +979,7 @@ dependencies = [
  "smol_str",
  "test-case",
  "test-log",
- "thiserror-no-std",
+ "thiserror",
 ]
 
 [[package]]
@@ -997,7 +996,7 @@ dependencies = [
  "salsa",
  "smol_str",
  "test-log",
- "thiserror-no-std",
+ "thiserror",
  "unescaper",
 ]
 
@@ -1041,7 +1040,7 @@ dependencies = [
  "num-traits 0.2.16",
  "rayon",
  "salsa",
- "thiserror-no-std",
+ "thiserror",
 ]
 
 [[package]]
@@ -1080,7 +1079,7 @@ dependencies = [
 [[package]]
 name = "cairo-lang-utils"
 version = "2.1.0"
-source = "git+https://github.com/keep-starknet-strange/cairo?branch=no_std-support-8bbf530#0e591510d73be8d737b0832dc9215ff409e0ed15"
+source = "git+https://github.com/keep-starknet-strange/cairo?branch=no_std-support-8bbf530#1d03d228c3bee4c7d641a100696fe6b043637b1d"
 dependencies = [
  "cairo-felt",
  "hashbrown 0.14.0",

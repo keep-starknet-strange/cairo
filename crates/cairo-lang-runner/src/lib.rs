@@ -37,7 +37,7 @@ use casm_run::hint_to_hint_params;
 pub use casm_run::{CairoHintProcessor, StarknetState};
 use itertools::chain;
 use num_traits::ToPrimitive;
-use thiserror_no_std::Error;
+use thiserror::Error;
 
 pub mod casm_run;
 

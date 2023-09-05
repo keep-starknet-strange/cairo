@@ -24,7 +24,7 @@ itertools.workspace = true
 log.workspace = true
 salsa.workspace = true
 smol_str.workspace = true
-thiserror-no-std.workspace = true
+thiserror.workspace = true
 
 [dev-dependencies]
 test-log.workspace = true

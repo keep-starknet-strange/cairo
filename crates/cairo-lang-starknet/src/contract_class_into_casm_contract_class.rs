@@ -36,7 +36,7 @@ use num_bigint::BigUint;
 use num_integer::Integer;
 use num_traits::Signed;
 use once_cell::sync::Lazy;
-use thiserror_no_std::Error;
+use thiserror::Error;
 
 use crate::allowed_libfuncs::AllowedLibfuncsError;
 use crate::compiler_version::current_compiler_version_id;
