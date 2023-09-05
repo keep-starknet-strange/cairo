@@ -471,7 +471,6 @@ dependencies = [
  "itertools",
  "num-bigint",
  "serde",
- "thiserror",
 ]
 
 [[package]]
