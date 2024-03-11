@@ -924,6 +924,7 @@ dependencies = [
  "num-integer",
  "num-traits 0.2.17",
  "once_cell",
+ "parity-scale-codec",
  "pretty_assertions",
  "serde",
  "serde_json",

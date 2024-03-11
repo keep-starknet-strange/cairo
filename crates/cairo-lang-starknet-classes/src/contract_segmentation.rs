@@ -4,6 +4,7 @@ mod test;
 
 use cairo_lang_sierra::program::{Program, Statement, StatementIdx};
 use cairo_lang_sierra_to_casm::compiler::CairoProgram;
+use parity_scale_codec::{Decode, Encode};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -15,10 +16,11 @@ use thiserror::Error;
 /// For example, the contract may be segmented by functions, where each function is segmented by
 /// its branches. It is also possible to have the inner segmentation only for some of the functions,
 /// while others are kept as non-segmented leaves in the tree.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Encode, Decode)]
 #[serde(untagged)]
 pub enum NestedIntList {
-    Leaf(usize),
+    Leaf(u64),
     Node(Vec<NestedIntList>),
 }
 
@@ -47,7 +49,7 @@ pub fn compute_bytecode_segment_lengths(
     Ok(NestedIntList::Node(
         get_segment_lengths(&segment_start_offsets, bytecode_len)
             .iter()
-            .map(|length| NestedIntList::Leaf(*length))
+            .map(|length| NestedIntList::Leaf(*length as u64))
             .collect(),
     ))
 }
