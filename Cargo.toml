@@ -84,8 +84,8 @@ ark-secp256r1 = "0.4.0"
 ark-std = "0.4.0"
 assert_matches = "1.5"
 bimap = "0.6.3"
-cairo-felt = { git = "https://github.com/bidzyyys/cairo-vm.git", branch = "feature/scale-codec" }
-cairo-vm = { git = "https://github.com/bidzyyys/cairo-vm.git", branch = "feature/scale-codec" }
+cairo-felt = { git = "https://github.com/bidzyyys/cairo-vm.git", branch = "feature/scale-codec", features = ["parity-scale-codec"]}
+cairo-vm = { git = "https://github.com/bidzyyys/cairo-vm.git", branch = "feature/scale-codec", features = ["parity-scale-codec"]}
 clap = { version = "4.4", features = ["derive"] }
 colored = "2"
 const-fnv1a-hash = "1.1.0"
