@@ -19,6 +19,7 @@ use thiserror::Error;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Encode, Decode)]
 #[serde(untagged)]
+#[cfg_attr(feature = "scale-info", derive(scale_info::TypeInfo))]
 pub enum NestedIntList {
     Leaf(u64),
     Node(Vec<NestedIntList>),

@@ -13,6 +13,7 @@ mod test;
     feature = "parity-scale-codec",
     derive(parity_scale_codec::Encode, parity_scale_codec::Decode)
 )]
+#[cfg_attr(feature = "scale-info", derive(scale_info::TypeInfo))]
 pub enum Register {
     #[cfg_attr(feature = "parity-scale-codec", codec(index = 0))]
     AP,
@@ -36,6 +37,7 @@ impl Display for Register {
     feature = "parity-scale-codec",
     derive(parity_scale_codec::Encode, parity_scale_codec::Decode)
 )]
+#[cfg_attr(feature = "scale-info", derive(scale_info::TypeInfo))]
 pub enum ResOperand {
     #[cfg_attr(feature = "parity-scale-codec", codec(index = 0))]
     Deref(CellRef),
@@ -79,6 +81,7 @@ impl<T: Into<BigIntAsHex>> From<T> for ResOperand {
     feature = "parity-scale-codec",
     derive(parity_scale_codec::Encode, parity_scale_codec::Decode)
 )]
+#[cfg_attr(feature = "scale-info", derive(scale_info::TypeInfo))]
 pub struct CellRef {
     pub register: Register,
     pub offset: i16,
@@ -101,6 +104,7 @@ pub fn ap_cell_ref(offset: i16) -> CellRef {
     feature = "parity-scale-codec",
     derive(parity_scale_codec::Encode, parity_scale_codec::Decode)
 )]
+#[cfg_attr(feature = "scale-info", derive(scale_info::TypeInfo))]
 pub enum DerefOrImmediate {
     #[cfg_attr(feature = "parity-scale-codec", codec(index = 0))]
     Deref(CellRef),
@@ -133,6 +137,7 @@ impl From<CellRef> for DerefOrImmediate {
     feature = "parity-scale-codec",
     derive(parity_scale_codec::Encode, parity_scale_codec::Decode)
 )]
+#[cfg_attr(feature = "scale-info", derive(scale_info::TypeInfo))]
 pub enum Operation {
     #[cfg_attr(feature = "parity-scale-codec", codec(index = 0))]
     Add,
@@ -155,6 +160,7 @@ impl Display for Operation {
     feature = "parity-scale-codec",
     derive(parity_scale_codec::Encode, parity_scale_codec::Decode)
 )]
+#[cfg_attr(feature = "scale-info", derive(scale_info::TypeInfo))]
 pub struct BinOpOperand {
     pub op: Operation,
     pub a: CellRef,

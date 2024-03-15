@@ -181,3 +181,18 @@ mod impl_parity_scale_codec {
         }
     }
 }
+
+#[cfg(feature = "scale-info")]
+impl scale_info::TypeInfo for BigIntAsHex {
+    type Identity = Self;
+
+    fn type_info() -> scale_info::Type {
+        scale_info::Type::builder()
+            .path(scale_info::Path::new("BigIntAsHex", module_path!()))
+            .composite(
+                scale_info::build::Fields::named()
+                    .field(|f| f.ty::<u8>().name("sign").type_name("u8"))
+                    .field(|f| f.ty::<Vec<u64>>().name("data").type_name("Vec<u64>")),
+            )
+    }
+}

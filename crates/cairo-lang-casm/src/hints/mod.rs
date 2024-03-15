@@ -23,6 +23,7 @@ mod test;
     feature = "parity-scale-codec",
     derive(parity_scale_codec::Encode, parity_scale_codec::Decode)
 )]
+#[cfg_attr(feature = "scale-info", derive(scale_info::TypeInfo))]
 pub enum Hint {
     #[cfg_attr(feature = "parity-scale-codec", codec(index = 0))]
     Core(CoreHintBase),
@@ -70,6 +71,7 @@ impl PythonicHint for Hint {
     feature = "parity-scale-codec",
     derive(parity_scale_codec::Encode, parity_scale_codec::Decode)
 )]
+#[cfg_attr(feature = "scale-info", derive(scale_info::TypeInfo))]
 pub enum StarknetHint {
     #[cfg_attr(feature = "parity-scale-codec", codec(index = 0))]
     SystemCall { system: ResOperand },
@@ -92,6 +94,7 @@ pub enum StarknetHint {
     feature = "parity-scale-codec",
     derive(parity_scale_codec::Encode, parity_scale_codec::Decode)
 )]
+#[cfg_attr(feature = "scale-info", derive(scale_info::TypeInfo))]
 pub enum CoreHintBase {
     #[cfg_attr(feature = "parity-scale-codec", codec(index = 0))]
     Core(CoreHint),
@@ -117,6 +120,7 @@ impl From<DeprecatedHint> for CoreHintBase {
     feature = "parity-scale-codec",
     derive(parity_scale_codec::Encode, parity_scale_codec::Decode)
 )]
+#[cfg_attr(feature = "scale-info", derive(scale_info::TypeInfo))]
 pub enum CoreHint {
     #[cfg_attr(feature = "parity-scale-codec", codec(index = 0))]
     AllocSegment { dst: CellRef },
@@ -292,6 +296,7 @@ pub enum CoreHint {
     feature = "parity-scale-codec",
     derive(parity_scale_codec::Encode, parity_scale_codec::Decode)
 )]
+#[cfg_attr(feature = "scale-info", derive(scale_info::TypeInfo))]
 pub enum DeprecatedHint {
     /// Asserts that the current access indices list is empty (after the loop).
     #[cfg_attr(feature = "parity-scale-codec", codec(index = 0))]

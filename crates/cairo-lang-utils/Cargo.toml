@@ -20,6 +20,7 @@ env_logger = { workspace = true, optional = true }
 time = { workspace = true, optional = true }
 log = { workspace = true, optional = true }
 parity-scale-codec = { workspace = true, optional = true }
+scale-info = { workspace = true, optional = true }
 
 [dev-dependencies]
 serde_json.workspace = true
@@ -38,5 +39,6 @@ std = [
 serde = ["dep:serde", "num-bigint/serde", "indexmap/serde"]
 schemars = ["std", "serde", "dep:schemars"]
 parity-scale-codec = ["dep:parity-scale-codec"]
+scale-info = ["dep:scale-info"]
 testing = []
 env_logger = ["std", "dep:env_logger", "dep:time", "dep:log"]

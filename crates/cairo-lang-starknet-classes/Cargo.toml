@@ -6,6 +6,10 @@ repository.workspace = true
 license-file.workspace = true
 description = "Starknet definitions for contract classes."
 
+[features]
+default = []
+scale-info = ["dep:scale-info", "cairo-lang-utils/scale-info", "cairo-lang-casm/scale-info"]
+
 [dependencies]
 cairo-felt.workspace = true
 cairo-lang-casm = { path = "../cairo-lang-casm", version = "2.6.0-rc.0", default-features = true, features = ["serde"] }
@@ -25,6 +29,9 @@ sha3.workspace = true
 smol_str.workspace = true
 starknet-crypto.workspace = true
 thiserror.workspace = true
+
+# Optional deps
+scale-info = { workspace = true, optional = true }
 
 [dev-dependencies]
 cairo-lang-sierra-generator = { path = "../cairo-lang-sierra-generator" }
