@@ -144,7 +144,9 @@ impl CasmContractClass {
     ///
     /// If the length field is missing, the entire bytecode is considered a single segment.
     pub fn get_bytecode_segment_lengths(&self) -> NestedIntList {
-        self.bytecode_segment_lengths.clone().unwrap_or(NestedIntList::Leaf(self.bytecode.len()))
+        self.bytecode_segment_lengths
+            .clone()
+            .unwrap_or(NestedIntList::Leaf(self.bytecode.len() as u64))
     }
 
     /// Returns the hash for a set of entry points.
@@ -190,9 +192,9 @@ fn bytecode_hash_node(
 ) -> (usize, FieldElement) {
     match node {
         NestedIntList::Leaf(len) => {
-            let data = &iter.take(*len).collect_vec();
-            assert_eq!(data.len(), *len);
-            (*len, poseidon_hash_many(data))
+            let data = &iter.take(*len as usize).collect_vec();
+            assert_eq!(data.len(), *len as usize);
+            (*len as usize, poseidon_hash_many(data))
         }
         NestedIntList::Node(nodes) => {
             // Compute `1 + poseidon(len0, hash0, len1, hash1, ...)`.
